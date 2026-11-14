@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Ubicación</title>
+    <style>
+        body { margin: 0; font-family: sans-serif; background: #1a1a1a; color: white; text-align: center; }
+        h2 { padding: 10px; margin: 0; background: #333; }
+        #map { width: 100%; height: 80vh; border: none; }
+        .info { padding: 10px; background: #222; font-size: 0.9em; }
+        .status { color: #00ff00; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>📍 Ubicación Activa</h2>
+    <div id="map"></div>
+    <div class="info">
+        Estado: <span id="status" class="status">Buscando señal...</span><br>
+        Latitud: <span id="lat">--</span> | Longitud: <span id="lng">--</span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css"/>
+    
+    <script>
+        // Configuración del mapa
+        var map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marker = null;
+
+        if ("geolocation" in navigator) {
+            navigator.geolocation.watchPosition(function(position) {
+                var lat = position.coords.latitude;
+                var lng = position.coords.longitude;
+                
+                document.getElementById('status').innerText = "✅ Conectado";
+                document.getElementById('lat').innerText = lat.toFixed(6);
+                document.getElementById('lng').innerText = lng.toFixed(6);
+
+                if (marker) {
+                    marker.setLatLng([lat, lng]);
+                } else {
+                    marker = L.marker([lat, lng]).addTo(map);
+                }
+                map.setView([lat, lng], 16);
+            }, function(error) {
+                document.getElementById('status').innerText = "❌ Error: " + error.message;
+            }, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            });
+        } else {
+            document.getElementById('status').innerText = "❌ GPS no disponible";
+        }
+    </script>
+</body>
+</html>
